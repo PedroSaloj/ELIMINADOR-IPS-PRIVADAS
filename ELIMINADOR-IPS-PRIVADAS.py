@@ -60,31 +60,34 @@ def leer_ips_manual() -> Set[str]:
     return ips
 
 
-def leer_ips_lista() -> Set[str]:
+def leer_ips_txt() -> Set[str]:
     """
-    Lee IPs desde una lista predefinida en el código.
+    Lee IPs desde un archivo de texto (TXT).
     
     Returns:
-        Set de direcciones IP de la lista
+        Set de direcciones IP leídas del archivo
     """
-    # Lista de ejemplo - puedes modificarla según necesites
-    lista_ips = [
-        "192.168.1.1",      # Privada
-        "10.0.0.1",         # Privada
-        "8.8.8.8",          # Pública (Google DNS)
-        "1.1.1.1",          # Pública (Cloudflare DNS)
-        "172.16.0.1",       # Privada
-        "208.67.222.222",   # Pública (OpenDNS)
-        "127.0.0.1",        # Loopback
-        "169.254.1.1",      # Link-local
-        "224.0.0.1",        # Multicast
-        "93.184.216.34",    # Pública (example.com)
-        "192.168.100.50",   # Privada
-        "142.251.41.14",    # Pública (google.com)
-    ]
+    ips = set()
     
-    print("\n📋 Lista predefinida cargada con {} IPs".format(len(lista_ips)))
-    return set(lista_ips)
+    archivo = input("\n📄 Ingrese la ruta del archivo TXT: ").strip()
+    
+    if not os.path.exists(archivo):
+        print(f"  ❌ Error: El archivo '{archivo}' no existe")
+        return ips
+    
+    try:
+        with open(archivo, 'r', encoding='utf-8') as file:
+            for linea in file:
+                # Limpiar cada línea y agregar la IP
+                ip = linea.strip()
+                if ip and not ip.startswith('#'):  # Ignorar líneas vacías y comentarios
+                    ips.add(ip)
+        
+        print(f"  ✅ Se leyeron {len(ips)} IPs del archivo")
+    except Exception as e:
+        print(f"  ❌ Error al leer el archivo: {e}")
+    
+    return ips
 
 
 def leer_ips_csv() -> Set[str]:
@@ -109,7 +112,7 @@ def leer_ips_csv() -> Set[str]:
                 for campo in row:
                     # Limpiar y agregar cada IP encontrada
                     ip = campo.strip()
-                    if ip:
+                    if ip and not ip.startswith('#'):  # Ignorar comentarios
                         ips.add(ip)
         
         print(f"  ✅ Se leyeron {len(ips)} IPs del archivo")
@@ -179,7 +182,7 @@ def mostrar_menu():
     print("="*50)
     print("\nSeleccione el método de entrada:")
     print("  1. 📝 Ingresar IPs manualmente")
-    print("  2. 📋 Usar lista predefinida")
+    print("  2. 📄 Cargar desde archivo TXT")
     print("  3. 📁 Cargar desde archivo CSV")
     print("  4. ❌ Salir")
     print("-"*50)
@@ -204,7 +207,7 @@ def main():
         if opcion == '1':
             ips = leer_ips_manual()
         elif opcion == '2':
-            ips = leer_ips_lista()
+            ips = leer_ips_txt()
         elif opcion == '3':
             ips = leer_ips_csv()
         else:
